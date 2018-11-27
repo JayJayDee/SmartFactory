@@ -1,10 +1,10 @@
-import { ready, resolve } from "../lib";
+import { ready, resolve, search } from "../lib";
 import { Config } from './types';
 import { Modules } from './modules';
 
-export default async () => {
+(async () => {
+  await search(`${__dirname}/**/*.ts`);
   await ready();
-  console.log('app ready!');
   const cfg = resolve<Config>(Modules.Config);
   console.log(cfg);
-};
+})();

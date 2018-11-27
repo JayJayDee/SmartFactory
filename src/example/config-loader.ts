@@ -2,7 +2,7 @@ import { Modules } from './modules';
 import { MysqlConfig, HttpConfig, Config } from './types';
 import { injectable } from '../lib';
 
-export const mysqlConfig = injectable(Modules.HttpConfig,
+injectable(Modules.MysqlConfig,
   [],
   async (): Promise<MysqlConfig> => {
     await delay(0.5);
@@ -15,14 +15,14 @@ export const mysqlConfig = injectable(Modules.HttpConfig,
     };
   });
 
-export const httpConfig = injectable(Modules.HttpConfig,
+injectable(Modules.HttpConfig,
   [],
   async (): Promise<HttpConfig> => {
     await delay(0.7);
     return { port: 8080 };
   });
 
-export const rootConfig = injectable(Modules.Config,
+injectable(Modules.Config,
   [Modules.HttpConfig, Modules.MysqlConfig],
   async (http: HttpConfig, mysql: MysqlConfig): Promise<Config> => {
     return { http, mysql };

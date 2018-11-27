@@ -4,5 +4,5 @@ import { injectable } from '../lib';
 injectable(Modules.UserModel,
   [],
   async () => {
-    
+    return {};
   });

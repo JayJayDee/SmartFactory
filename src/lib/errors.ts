@@ -8,3 +8,8 @@ export class SelfReferenceError extends Error {
     super(msg);
   }
 }
+export class DuplicateModuleKeyError extends Error {
+  constructor(msg: any) {
+    super(msg);
+  }
+}

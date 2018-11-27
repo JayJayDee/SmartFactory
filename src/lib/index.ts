@@ -1,5 +1,2 @@
-import resolveModule from './module-resolver';
-
 export { resolve, injectable, ready } from './container';
-
-resolveModule('**/*.ts');
+export { default as search } from './module-resolver';

@@ -1,5 +1,5 @@
-import { sortBy, reject, includes, some } from 'lodash';
-import { CyclicReferenceError, SelfReferenceError } from './errors';
+import { sortBy, reject, includes, some, difference, uniq } from 'lodash';
+import { CyclicReferenceError, SelfReferenceError, DuplicateModuleKeyError } from './errors';
 import { Candidate, Instantiator, Injectable } from './types';
 
 const candidates: Candidate[] = [];
@@ -14,11 +14,17 @@ export const ready = async () => {
   const sorted = sortBy(candidates, (cand) => cand.deps.length);
   const numCandidates = sorted.length;
 
+  checkKeyDuplicates(sorted); // TODO: not working, fix this.
   checkCyclicReference(sorted);
   checkSelfReference(sorted);
 
+  let loopCount = 0;
   while (instanceMap.size < numCandidates) {
     const cand = sorted.pop();
+    loopCount++;
+    if (loopCount > numCandidates * (numCandidates - 1)) {
+      throw new CyclicReferenceError(`cyclic reference found: ${cand.key}`);
+    }
     const depInsts = cand.deps.map((name: string) => instanceMap.get(name));
     if (reject(depInsts).length > 0) {
       sorted.unshift(cand);
@@ -27,7 +33,6 @@ export const ready = async () => {
     const instance = await cand.instantiator.apply(this, depInsts);
     instanceMap.set(cand.key, instance);
   }
-  console.log(instanceMap);
 };
 
 export const resolve = <T>(key: string): T => {
@@ -55,6 +60,18 @@ const checkSelfReference = (arr: Candidate[]) => {
   });
   if (some(selfs)) throw new SelfReferenceError(`self reference found: ${moduleName}`);
 };
+
+const checkKeyDuplicates = (arr: Candidate[]) => {
+  const duplicated = duplicatedKeys(arr);
+  if (duplicated.length > 0) {
+    throw new DuplicateModuleKeyError(`duplicated key found: ${duplicated[0]}`);
+  }
+};
+
+const duplicatedKeys = (arr: Candidate[]) =>
+  difference(
+    uniq(arr.map((elem) => elem.key)),
+    arr.map((elem) => elem.key));
 
 const selfReference = (a: Candidate) =>
   includes(a.deps, a.key);
