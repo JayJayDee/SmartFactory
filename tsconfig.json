@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "allowUnreachableCode": false,
+    "importHelpers": true,
+    "alwaysStrict": true,
+    "sourceMap": true,
+    "forceConsistentCasingInFileNames": true,
+    
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noImplicitAny": true,
+    "noImplicitThis": false,
+    "experimentalDecorators": true,
+
+    "strictNullChecks": false,
+    "lib": ["es6", "es2018.promise"],
+
+    "plugins": [
+      {"transform": "ts-transformer-keys/transformer"}
+    ]
+  },
+  "include": [
+    "src/**/*"
+  ]
+}
