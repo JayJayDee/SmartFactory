@@ -1,10 +1,7 @@
 export enum Modules {
   Config = 'Config',
+  MysqlConfig = 'MysqlConfig',
+  HttpConfig = 'HttpConfig',
   EndpointRunner = 'EndpointRunner',
   UserModel = 'UserModel'
 }
-
-export type Config = {
-  port: number;
-  host: string;
-};

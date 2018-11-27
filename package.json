@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --exec ts-node -- --project ./tsconfig.json ./src/example1",
+    "dev": "TS_NODE_FILES=true nodemon --exec ts-node -- --project ./tsconfig.json ./src/example",
     "test": "jest",
     "test:coverage": "jest --coverage"
   },
@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "express": "^4.16.4",
+    "glob-fs": "^0.1.7",
     "koa": "^2.6.2",
     "koa-router": "^7.4.0",
     "lodash": "^4.17.11",

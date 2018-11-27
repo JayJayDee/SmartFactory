@@ -17,13 +17,8 @@
     "noImplicitAny": true,
     "noImplicitThis": false,
     "experimentalDecorators": true,
-
     "strictNullChecks": false,
-    "lib": ["es6", "es2018.promise"],
-
-    "plugins": [
-      {"transform": "ts-transformer-keys/transformer"}
-    ]
+    "lib": ["es6", "es2018.promise"]
   },
   "include": [
     "src/**/*"
