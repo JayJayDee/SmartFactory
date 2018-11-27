@@ -7,7 +7,8 @@ enum ModuleName {
   DependFunction = 'DependFunction',
   DependFunction2 = 'DependFunction2',
   
-  Module1 = 'Module1'
+  Module1 = 'Module1',
+  Module2 = 'Module2'
 }
 
 type DummyCfg = {
