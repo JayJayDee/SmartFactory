@@ -1,5 +1,6 @@
 import { resolveFunc, injectableFunc, readyFunc } from './container';
-import search from './module-resolver';
+import searchFunc from './module-resolver';
+import loggerFunc from './logger';
 import { Candidate, ContainerOptions } from './types';
 
 const candidates: Candidate[] = [];
@@ -13,8 +14,21 @@ const options: ContainerOptions = {
 
 const resolve = resolveFunc(options, instanceMap);
 const injectable = injectableFunc(options, candidates);
-const ready = readyFunc(options, candidates, instanceMap);
-
 export {
-  resolve, injectable, ready, search
+  resolve, injectable
 }
+
+export default async (opts?: ContainerOptions): Promise<void> => {
+  if (opts) {
+    if (opts.debug) options.debug = opts.debug;
+    if (opts.includes) options.includes = opts.includes;
+    if (opts.excludes) options.excludes = opts.excludes;
+  }
+
+  const logger = loggerFunc(opts);
+  const ready = readyFunc(options, logger, candidates, instanceMap);
+  const search = searchFunc(options, logger);
+
+  await search(options.includes, options.excludes);
+  await ready();
+};

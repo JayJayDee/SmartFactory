@@ -1,15 +1,6 @@
 import { sortBy, reject, includes, some, uniq, filter } from 'lodash';
 import { CyclicReferenceError, SelfReferenceError, DuplicateModuleKeyError } from './errors';
-import { Candidate, Instantiator, Injectable, ContainerOptions } from './types';
-
-// container initializer factory.
-export const initFunc = (srcOpts: ContainerOptions) =>
-  (inputedOpts?: ContainerOptions) => {
-    if (!inputedOpts) return;
-    if (inputedOpts.debug) srcOpts.debug = inputedOpts.debug;
-    if (inputedOpts.excludes) srcOpts.excludes = inputedOpts.excludes;
-    if (inputedOpts.includes) srcOpts.includes = inputedOpts.includes;
-  };
+import { Candidate, Instantiator, Injectable, ContainerOptions, ContainerLogger } from './types';
 
 // container module-registerer factory.
 export const injectableFunc = (
@@ -23,11 +14,14 @@ export const injectableFunc = (
 // container ready awaiting function factory.
 export const readyFunc = (
   srcOpts: ContainerOptions,
+  logger: ContainerLogger,
   candidates: Candidate[],
   instances: Map<string, any>) =>
     async () => {
       const sorted = sortBy(candidates, (cand) => cand.deps.length);
       const numCandidates = sorted.length;
+      logger.debug(`* injection candidates:`);
+      logger.debug(sorted);
 
       checkKeyDuplicates(sorted);
       checkCyclicReference(sorted);
@@ -48,6 +42,8 @@ export const readyFunc = (
         const instance = await cand.instantiator.apply(this, depInsts);
         instances.set(cand.key, instance);
       }
+      logger.debug(`* modules in container`);
+      logger.debug(instances);
     };
 
 // module from container resolver function factory.

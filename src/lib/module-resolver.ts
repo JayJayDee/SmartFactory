@@ -1,17 +1,26 @@
 import * as glob from 'glob';
 import { flatten } from 'lodash';
+import { ContainerOptions, ContainerLogger } from './types';
 
-const search = async (...searchPaths: string[]) => {
-  const rawPaths = await Promise.all(searchPaths.map((expr: string) => globPromise(expr)));
-  flatten(rawPaths).map((path: string) => {
-    return require(path);
-  });
-};
-export default search;
+const searchFunc = (
+  opts: ContainerOptions,
+  logger: ContainerLogger) =>
+    async (includes: string[], excludes?: string[]) => {
+      const rawPaths = await Promise.all(
+        includes.map((expr: string) => globPromise(expr, excludes)));
+      const modules = flatten(rawPaths).map((path: string) => {
+        require(path);
+        return null;
+      });
+      logger.debug(`* searched ${modules.length} modules`);
+    };
+export default searchFunc;
 
-const globPromise = (path: string): Promise<string[]> => {
+const globPromise = (path: string, excludes?: string[]): Promise<string[]> => {
   return new Promise((resolve, reject) => {
-    glob(path, (err: Error, files: string[]) => {
+    const opts: glob.IOptions = {};
+    if (excludes) opts.ignore = excludes;
+    glob(path, opts, (err: Error, files: string[]) => {
       if (err) return reject(err);
       resolve(files);
     });
