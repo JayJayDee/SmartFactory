@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "allowJs": false,
+    "importHelpers": false,
+    "removeComments": true,
+    "declaration": true,
+    "declarationDir": "dist/typings"
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

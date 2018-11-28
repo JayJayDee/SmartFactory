@@ -2,22 +2,25 @@
   "name": "smart-factory",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/lib/index.js",
+  "typings": "dist/typings/lib/index.d.ts",
   "scripts": {
     "dev": "TS_NODE_FILES=true nodemon --exec ts-node -- --project ./tsconfig.json ./src/example",
+    "build": "tsc -p tsconfig.release.json",
     "test": "jest",
+    "lint": "tslint -t stylish --project ./tsconfig.json",
     "test:coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JayJayDee/Chatpot-Auth-Server.git"
+    "url": "git+https://github.com/JayJayDee/SmartFactory.git"
   },
   "author": "JayJayDee",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/JayJayDee/Chatpot-Auth-Server/issues"
+    "url": "https://github.com/JayJayDee/SmartFactory/issues"
   },
-  "homepage": "https://github.com/JayJayDee/Chatpot-Auth-Server#readme",
+  "homepage": "https://github.com/JayJayDee/SmartFactory#readme",
   "devDependencies": {
     "@types/express": "^4.16.0",
     "@types/glob": "^7.1.1",
@@ -33,6 +36,7 @@
     "ts-jest": "^23.10.4",
     "ts-node": "^7.0.1",
     "tslib": "^1.9.3",
+    "tslint": "^5.11.0",
     "typescript": "^3.1.6"
   },
   "dependencies": {
