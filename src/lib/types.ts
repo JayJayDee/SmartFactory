@@ -15,3 +15,9 @@ export type Candidate = {
   deps: string[];
   instantiator: Instantiator;
 };
+
+export type ContainerOptions = {
+  debug?: boolean;
+  includes: string[];
+  excludes?: string[];
+};

@@ -1,39 +1,61 @@
 import { sortBy, reject, includes, some, uniq, filter } from 'lodash';
 import { CyclicReferenceError, SelfReferenceError, DuplicateModuleKeyError } from './errors';
-import { Candidate, Instantiator, Injectable } from './types';
+import { Candidate, Instantiator, Injectable, ContainerOptions } from './types';
 
 const candidates: Candidate[] = [];
 const instanceMap = new Map<string, any>();
 
-export const injectable = async <T>(key: string, deps: string[], instantiator: Instantiator) => {
-  candidates.push({ key, deps, instantiator });
-  return new Injectable<T>(key);
+const options: ContainerOptions = {
+  debug: false,
+  includes: ['**/*'],
+  excludes: ['node_modules/']
 };
 
-export const ready = async () => {
-  const sorted = sortBy(candidates, (cand) => cand.deps.length);
-  const numCandidates = sorted.length;
+// container initializer factory.
+const initialize = (srcOpts: ContainerOptions) =>
+  (inputedOpts?: ContainerOptions) => {
+    if (!inputedOpts) return;
+    if (inputedOpts.debug) srcOpts.debug = inputedOpts.debug;
+    if (inputedOpts.excludes) srcOpts.excludes = inputedOpts.excludes;
+    if (inputedOpts.includes) srcOpts.includes = inputedOpts.includes;
+  };
+export const init = initialize(options);
 
-  checkKeyDuplicates(sorted);
-  checkCyclicReference(sorted);
-  checkSelfReference(sorted);
+// container module-registerer factory.
+const injectableFunc = (srcOpts: ContainerOptions) =>
+  async <T>(key: string, deps: string[], instantiator: Instantiator) => {
+    candidates.push({ key, deps, instantiator });
+    return new Injectable<T>(key);
+  };
+export const injectable = injectableFunc(options);
 
-  let loopCount = 0;
-  while (instanceMap.size < numCandidates) {
-    const cand = sorted.pop();
-    loopCount++;
-    if (loopCount > numCandidates * (numCandidates - 1)) {
-      throw new CyclicReferenceError(`cyclic reference found: ${cand.key}`);
+const readyFunc = (srcOpts: ContainerOptions) =>
+  async () => {
+    const sorted = sortBy(candidates, (cand) => cand.deps.length);
+    const numCandidates = sorted.length;
+
+    checkKeyDuplicates(sorted);
+    checkCyclicReference(sorted);
+    checkSelfReference(sorted);
+
+    let loopCount = 0;
+    while (instanceMap.size < numCandidates) {
+      const cand = sorted.pop();
+      loopCount++;
+      if (loopCount > numCandidates * (numCandidates - 1)) {
+        throw new CyclicReferenceError(`cyclic reference found: ${cand.key}`);
+      }
+      const depInsts = cand.deps.map((name: string) => instanceMap.get(name));
+      if (reject(depInsts).length > 0) {
+        sorted.unshift(cand);
+        continue;
+      }
+      const instance = await cand.instantiator.apply(this, depInsts);
+      instanceMap.set(cand.key, instance);
     }
-    const depInsts = cand.deps.map((name: string) => instanceMap.get(name));
-    if (reject(depInsts).length > 0) {
-      sorted.unshift(cand);
-      continue;
-    }
-    const instance = await cand.instantiator.apply(this, depInsts);
-    instanceMap.set(cand.key, instance);
-  }
-};
+  };
+export const ready = readyFunc(options);
+
 
 export const resolve = <T>(key: string): T => {
   return instanceMap.get(key);
