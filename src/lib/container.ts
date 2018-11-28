@@ -1,4 +1,4 @@
-import { sortBy, reject, includes, some, difference, uniq } from 'lodash';
+import { sortBy, reject, includes, some, uniq, filter } from 'lodash';
 import { CyclicReferenceError, SelfReferenceError, DuplicateModuleKeyError } from './errors';
 import { Candidate, Instantiator, Injectable } from './types';
 
@@ -14,7 +14,7 @@ export const ready = async () => {
   const sorted = sortBy(candidates, (cand) => cand.deps.length);
   const numCandidates = sorted.length;
 
-  checkKeyDuplicates(sorted); // TODO: not working, fix this.
+  checkKeyDuplicates(sorted);
   checkCyclicReference(sorted);
   checkSelfReference(sorted);
 
@@ -62,16 +62,16 @@ const checkSelfReference = (arr: Candidate[]) => {
 };
 
 const checkKeyDuplicates = (arr: Candidate[]) => {
-  const duplicated = duplicatedKeys(arr);
-  if (duplicated.length > 0) {
-    throw new DuplicateModuleKeyError(`duplicated key found: ${duplicated[0]}`);
+  const duplciates = duplicateKeys(arr);
+  if (duplciates.length > 0) {
+    throw new DuplicateModuleKeyError(`duplicated key found: ${duplciates[0]}`);
   }
 };
 
-const duplicatedKeys = (arr: Candidate[]) =>
-  difference(
-    uniq(arr.map((elem) => elem.key)),
-    arr.map((elem) => elem.key));
+const duplicateKeys = (arr: Candidate[]): string[] =>
+  uniq(arr.map((elem) => elem.key)).map((key: string) =>
+    filter(arr, (elem) => elem.key === key).length === 1 ? null : key)
+    .filter((elem) => (elem));
 
 const selfReference = (a: Candidate) =>
   includes(a.deps, a.key);
