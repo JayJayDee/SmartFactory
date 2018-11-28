@@ -6,7 +6,6 @@ import { Config } from './types';
 (async () => {
   // container configuration.
   await factory({
-    debug: true,
     includes: [`${__dirname}/**/*.ts`]
   });
   
