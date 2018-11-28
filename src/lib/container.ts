@@ -5,7 +5,7 @@ import { Candidate, Instantiator, Injectable } from './types';
 const candidates: Candidate[] = [];
 const instanceMap = new Map<string, any>();
 
-export const injectable = async <T>(key: string,deps: string[], instantiator: Instantiator) => {
+export const injectable = async <T>(key: string, deps: string[], instantiator: Instantiator) => {
   candidates.push({ key, deps, instantiator });
   return new Injectable<T>(key);
 };

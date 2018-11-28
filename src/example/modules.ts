@@ -3,7 +3,8 @@ export enum Modules {
   MysqlConfig = 'MysqlConfig',
   HttpConfig = 'HttpConfig',
 
-  EndpointRunner = 'EndpointRunner',
+  EndpointsRunner = 'EndpointsRunner',
+  UserEndpoints = 'UserEndpoints',
   UserModel = 'UserModel',
   MysqlDriver = 'MysqlDriver'
 }

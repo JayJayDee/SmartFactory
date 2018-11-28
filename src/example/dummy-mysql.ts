@@ -4,23 +4,23 @@ import { MysqlConfig } from './types';
 
 injectable(Modules.MysqlDriver,
   [Modules.MysqlConfig],
-  async (cfg: MysqlConfig): Promise<Connection> => {
+  async (cfg: MysqlConfig): Promise<MysqlDriver> => {
     const connection = connector(cfg);
     return await connection();
   });
 
-type Connection = {
+export type MysqlDriver = {
   query: (sql: string, params?: any[]) => Promise<any>;
 };
 
 const connector = (cfg: MysqlConfig) =>
-  async (): Promise<Connection> => {
+  async (): Promise<MysqlDriver> => {
     await delay(0.5);
     return {
       async query(sql: string, params?: any[]) {
         return [
           { test: 'test-data' },
-          { test: 'test-data-2' }
+          { test: 'test-data-2' } 
         ];
       }
     }
