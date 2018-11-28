@@ -21,3 +21,8 @@ export type ContainerOptions = {
   includes: string[];
   excludes?: string[];
 };
+
+export type ContainerLogger = {
+  info: (payload: any) => void;
+  debug: (payload: any) => void;
+}

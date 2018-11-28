@@ -2,64 +2,63 @@ import { sortBy, reject, includes, some, uniq, filter } from 'lodash';
 import { CyclicReferenceError, SelfReferenceError, DuplicateModuleKeyError } from './errors';
 import { Candidate, Instantiator, Injectable, ContainerOptions } from './types';
 
-const candidates: Candidate[] = [];
-const instanceMap = new Map<string, any>();
-
-const options: ContainerOptions = {
-  debug: false,
-  includes: ['**/*'],
-  excludes: ['node_modules/']
-};
-
 // container initializer factory.
-const initialize = (srcOpts: ContainerOptions) =>
+export const initFunc = (srcOpts: ContainerOptions) =>
   (inputedOpts?: ContainerOptions) => {
     if (!inputedOpts) return;
     if (inputedOpts.debug) srcOpts.debug = inputedOpts.debug;
     if (inputedOpts.excludes) srcOpts.excludes = inputedOpts.excludes;
     if (inputedOpts.includes) srcOpts.includes = inputedOpts.includes;
   };
-export const init = initialize(options);
 
 // container module-registerer factory.
-const injectableFunc = (srcOpts: ContainerOptions) =>
-  async <T>(key: string, deps: string[], instantiator: Instantiator) => {
-    candidates.push({ key, deps, instantiator });
-    return new Injectable<T>(key);
-  };
-export const injectable = injectableFunc(options);
+export const injectableFunc = (
+  srcOpts: ContainerOptions,
+  candidates: Candidate[]) =>
+    async <T>(key: string, deps: string[], instantiator: Instantiator) => {
+      candidates.push({ key, deps, instantiator });
+      return new Injectable<T>(key);
+    };
 
-const readyFunc = (srcOpts: ContainerOptions) =>
-  async () => {
-    const sorted = sortBy(candidates, (cand) => cand.deps.length);
-    const numCandidates = sorted.length;
+// container ready awaiting function factory.
+export const readyFunc = (
+  srcOpts: ContainerOptions,
+  candidates: Candidate[],
+  instances: Map<string, any>) =>
+    async () => {
+      const sorted = sortBy(candidates, (cand) => cand.deps.length);
+      const numCandidates = sorted.length;
 
-    checkKeyDuplicates(sorted);
-    checkCyclicReference(sorted);
-    checkSelfReference(sorted);
+      checkKeyDuplicates(sorted);
+      checkCyclicReference(sorted);
+      checkSelfReference(sorted);
 
-    let loopCount = 0;
-    while (instanceMap.size < numCandidates) {
-      const cand = sorted.pop();
-      loopCount++;
-      if (loopCount > numCandidates * (numCandidates - 1)) {
-        throw new CyclicReferenceError(`cyclic reference found: ${cand.key}`);
+      let loopCount = 0;
+      while (instances.size < numCandidates) {
+        const cand = sorted.pop();
+        loopCount++;
+        if (loopCount > numCandidates * (numCandidates - 1)) {
+          throw new CyclicReferenceError(`cyclic reference found: ${cand.key}`);
+        }
+        const depInsts = cand.deps.map((name: string) => instances.get(name));
+        if (reject(depInsts).length > 0) {
+          sorted.unshift(cand);
+          continue;
+        }
+        const instance = await cand.instantiator.apply(this, depInsts);
+        instances.set(cand.key, instance);
       }
-      const depInsts = cand.deps.map((name: string) => instanceMap.get(name));
-      if (reject(depInsts).length > 0) {
-        sorted.unshift(cand);
-        continue;
-      }
-      const instance = await cand.instantiator.apply(this, depInsts);
-      instanceMap.set(cand.key, instance);
-    }
-  };
-export const ready = readyFunc(options);
+    };
+
+// module from container resolver function factory.
+export const resolveFunc = (
+  srcOpts: ContainerOptions,
+  instances: Map<string, any>) =>
+    <T> (key: string): T => {
+      return instances.get(key);
+    };
 
 
-export const resolve = <T>(key: string): T => {
-  return instanceMap.get(key);
-};
 
 const checkCyclicReference = (arr: Candidate[]) => {
   let expr = null;
