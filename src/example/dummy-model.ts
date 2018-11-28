@@ -24,9 +24,9 @@ const listUser = (mysql: MysqlDriver) =>
     const rows = await mysql.query('SELECT * FROM users LIMIT ?,?', [offset, size]);
     return rows.map((row: any) => {
       return {
-        no: row.no,
-        name: row.member,
-        age: row.age
+        no: 1,
+        name: 'Test',
+        age: 29
       };
     });
   };
