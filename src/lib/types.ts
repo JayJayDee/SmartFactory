@@ -18,7 +18,7 @@ export type Candidate = {
 
 export type ContainerOptions = {
   debug?: boolean;
-  includes: string[];
+  includes?: string[];
   excludes?: string[];
 };
 
