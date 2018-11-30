@@ -13,28 +13,50 @@ npm i smart-factory
 ```
 
 ## simple usage
-```
-// types 
-interface User {
-  name: string;
-  age: number;
+### typescript + es2015
+```typescript
+import factory, { injectable, resolve } from 'smart-factory';
+
+export enum Modules {
+  HELLO_FUNC = 'HELLO_FUNC',
+  MSG_PROVIDER = 'MSG_PROVIDER',
+  MSG_PRINTER = 'MSG_PRINTER'
 }
-type UserFetchFunction = (id: string) => Promise<User>;
 
-// implemented factory function
-const fetch = (mysql: Mysql): UserFetchFunction =>
-  async (id: string) =>
-    mysql.query('SELECT * FROM user WHERE id=?', [id]);
+export type MsgProvider = (lang: string) => string;
+export type MsgPrinter = (msg: string) => void;
+export type HelloFunction = (lang: string) => void;
 
-// container
-injectable('UserFetch', // module name 
-  [ MysqlDriver ], // dependancies
-  async (mysql: Mysql): Promise<UserFetchFunction> => 
-    fetch(mysql));
+injectable(
+  Modules.MSG_PROVIDER, // module name
+  [], // dependancies
+  async (): Promise<MsgProvider> =>
+    (lang: string): string => {
+      if (lang === 'en') return 'HELLO!';
+      else if (lang === 'ko') return '안녕하세요!';
+      else if (lang === 'es') return 'HOLA!';
+    });
 
-// resolve modules from container in other places
-const fetchFunction = resolve<UserFetchFunction>('UserFetch');
-await fetchFunction();
+injectable(
+  Modules.MSG_PRINTER,
+  [],
+  async () : Promise<MsgPrinter> =>
+    (msg: string) => console.log(msg);
+
+injectable(
+   Modules.HELLO_FUNC,
+   [ Modules.MSG_PROVIDER, Modules.MSG_PRINTER ], // has dependancies to MsgProvider, MsgPrinter
+   async (provider: MsgProvider, printer: MsgPrinter): HelloFunction =>
+     (lang: string) => {
+       printer(provider(lang));
+     });
+
+(async () => {
+  await factory();
+
+  const helloFunc = resolve<HelloFunction>(Modules.HELLO_FUNC);
+  helloFunc('es'); // HOLA!
+})();
 ```
 
 ## API reference
