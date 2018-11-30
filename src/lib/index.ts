@@ -8,7 +8,6 @@ const instanceMap = new Map<string, any>();
 
 const options: ContainerOptions = {
   debug: false,
-  includes: ['**/*'],
   excludes: ['node_modules/']
 };
 
@@ -18,17 +17,22 @@ export {
   resolve, injectable
 }
 
-export default async (opts?: ContainerOptions): Promise<void> => {
-  if (opts) {
-    if (opts.debug) options.debug = opts.debug;
-    if (opts.includes) options.includes = opts.includes;
-    if (opts.excludes) options.excludes = opts.excludes;
-  }
+const initializer = (srcOptions: ContainerOptions) =>
+  async (inputedOpts?: ContainerOptions): Promise<void> => {
+    if (inputedOpts) {
+      if (inputedOpts.debug) srcOptions.debug = inputedOpts.debug;
+      if (inputedOpts.includes) srcOptions.includes = inputedOpts.includes;
+      if (inputedOpts.excludes) srcOptions.excludes = inputedOpts.excludes;
+    }
 
-  const logger = loggerFunc(opts);
-  const ready = readyFunc(options, logger, candidates, instanceMap);
-  const search = searchFunc(options, logger);
+    const logger = loggerFunc(srcOptions);
+    const ready = readyFunc(srcOptions, logger, candidates, instanceMap);
 
-  await search(options.includes, options.excludes);
-  await ready();
-};
+    if (srcOptions.includes) {
+      const search = searchFunc(srcOptions, logger);
+      await search(srcOptions.includes, srcOptions.excludes);
+    }
+    await ready();
+  };
+
+export default initializer(options);
