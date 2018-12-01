@@ -15,7 +15,7 @@ npm i smart-factory
 ## simple usage
 ### typescript + es2015
 ```typescript
-import factory, { injectable, resolve } from 'smart-factory';
+import { init, injectable, resolve } from 'smart-factory';
 
 export enum Modules {
   HELLO_FUNC = 'HELLO_FUNC',
@@ -52,7 +52,7 @@ injectable(
      });
 
 (async () => {
-  await factory();
+  await init();
 
   const helloFunc = resolve<HelloFunction>(Modules.HELLO_FUNC);
   helloFunc('es'); // HOLA!

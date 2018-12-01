@@ -11,12 +11,6 @@ const options: ContainerOptions = {
   excludes: ['node_modules/']
 };
 
-const resolve = resolveFunc(options, instanceMap);
-const injectable = injectableFunc(options, candidates);
-export {
-  resolve, injectable
-}
-
 const initializer = (srcOptions: ContainerOptions) =>
   async (inputedOpts?: ContainerOptions): Promise<void> => {
     if (inputedOpts) {
@@ -35,4 +29,9 @@ const initializer = (srcOptions: ContainerOptions) =>
     await ready();
   };
 
-export default initializer(options);
+const resolve = resolveFunc(options, instanceMap);
+const injectable = injectableFunc(options, candidates);
+const init = initializer(options);
+export {
+  resolve, injectable, init
+}
