@@ -1,11 +1,11 @@
-import factory, { resolve } from "../lib";
+import { init, resolve } from "../lib";
 import { Modules } from './modules';
 import { RunEndpointFunction } from './endpoints-runner';
 import { Config } from './types';
 
 (async () => {
   // container configuration.
-  await factory({
+  await init({
     includes: [`${__dirname}/**/*.ts`]
   });
   

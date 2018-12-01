@@ -1,6 +1,6 @@
 {
   "name": "smart-factory",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "dist/lib/index.js",
   "typings": "dist/typings/lib/index.d.ts",
@@ -9,7 +9,7 @@
     "example1": "TS_NODE_FILES=true ts-node --project ./tsconfig.json ./src/example1",
     "example2": "TS_NODE_FILES=true ts-node --project ./tsconfig.json ./src/example2",
     "build": "tsc -p tsconfig.release.json",
-    "test": "jest",
+    "test": "jest -c jest.config.js",
     "lint": "tslint -t stylish --project ./tsconfig.json",
     "test:coverage": "jest --coverage"
   },

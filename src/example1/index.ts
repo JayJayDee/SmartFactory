@@ -1,4 +1,4 @@
-import factory, { injectable, resolve } from '../lib';
+import { init, injectable, resolve } from '../lib';
 
 export enum Modules {
   HELLO_FUNC = 'HELLO_FUNC',
@@ -36,7 +36,7 @@ injectable(
      });
 
 (async () => {
-  await factory();
+  await init();
 
   const helloFunc = resolve<HelloFunction>(Modules.HELLO_FUNC);
   helloFunc('es'); // HOLA!

@@ -24,15 +24,19 @@ export const readyFunc = (
       logger.debug(`* injection candidates:`);
       logger.debug(sorted);
 
-      checkKeyDuplicates(sorted);
-      checkCyclicReference(sorted);
-      checkSelfReference(sorted);
+      try {
+        checkKeyDuplicates(sorted);
+        checkCyclicReference(sorted);
+        checkSelfReference(sorted);
+      } catch (err) {
+        throw err;
+      }
 
       let loopCount = 0;
       while (instances.size < numCandidates) {
         const cand = sorted.pop();
         loopCount++;
-        if (loopCount > numCandidates * (numCandidates - 1)) {
+        if (loopCount > (numCandidates + 1) * numCandidates) {
           throw new CyclicReferenceError(`cyclic reference found: ${cand.key}`);
         }
         const depInsts = cand.deps.map((name: string) => instances.get(name));
