@@ -1,10 +1,12 @@
-import * as glob from 'glob';
 import { flatten } from 'lodash';
 import { ContainerOptions, ContainerLogger } from './types';
 
+export type GlobPromise = (path: string, excludes?: string[]) => Promise<string[]>;
+
 const searchFunc = (
   opts: ContainerOptions,
-  logger: ContainerLogger) =>
+  logger: ContainerLogger,
+  globPromise: GlobPromise) =>
     async (includes: string[], excludes?: string[]) => {
       const rawPaths = await Promise.all(
         includes.map((expr: string) => globPromise(expr, excludes)));
@@ -15,14 +17,3 @@ const searchFunc = (
       logger.debug(`* searched ${modules.length} modules`);
     };
 export default searchFunc;
-
-const globPromise = (path: string, excludes?: string[]): Promise<string[]> => {
-  return new Promise((resolve, reject) => {
-    const opts: glob.IOptions = {};
-    if (excludes) opts.ignore = excludes;
-    glob(path, opts, (err: Error, files: string[]) => {
-      if (err) return reject(err);
-      resolve(files);
-    });
-  });
-};
