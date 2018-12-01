@@ -1,5 +1,7 @@
+import * as glob from 'glob';
+
 import { resolveFunc, injectableFunc, readyFunc } from './container';
-import searchFunc from './module-resolver';
+import searchFunc, { GlobPromise } from './module-resolver';
 import loggerFunc from './logger';
 import { Candidate, ContainerOptions } from './types';
 
@@ -9,6 +11,17 @@ const instanceMap = new Map<string, any>();
 const options: ContainerOptions = {
   debug: false,
   excludes: ['node_modules/']
+};
+
+const globPromise: GlobPromise = (path: string, excludes?: string[]): Promise<string[]> => {
+  return new Promise((resolve, reject) => {
+    const opts: glob.IOptions = {};
+    if (excludes) opts.ignore = excludes;
+    glob(path, opts, (err: Error, files: string[]) => {
+      if (err) return reject(err);
+      resolve(files);
+    });
+  });
 };
 
 const initializer = (srcOptions: ContainerOptions) =>
@@ -23,7 +36,7 @@ const initializer = (srcOptions: ContainerOptions) =>
     const ready = readyFunc(srcOptions, logger, candidates, instanceMap);
 
     if (srcOptions.includes) {
-      const search = searchFunc(srcOptions, logger);
+      const search = searchFunc(srcOptions, logger, globPromise);
       await search(srcOptions.includes, srcOptions.excludes);
     }
     await ready();

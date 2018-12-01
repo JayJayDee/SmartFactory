@@ -1,5 +1,5 @@
 import { Candidate, ContainerLogger } from "../src/lib/types";
-import { injectableFunc, readyFunc } from '../src/lib/container';
+import { injectableFunc, readyFunc, resolveFunc } from '../src/lib/container';
 import { CyclicReferenceError, DuplicateModuleKeyError, SelfReferenceError } from "../src/lib/errors";
 
 describe('injectableFunc tests', () => {
@@ -57,5 +57,14 @@ describe('readyFunc tests', () => {
     const instanceMap = new Map<string, any>();
     const ready = readyFunc(null, dummyLogger, candidates, instanceMap);
     expect(ready()).rejects.toBeInstanceOf(SelfReferenceError);
+  });
+});
+
+describe('resolveFunc() tests', () => {
+  test('if there is an instance in map, resolve() must be returns not null', () => {
+    const instanceMap = new Map<string, any>();
+    instanceMap.set('test', 5);
+    const resolve = resolveFunc({}, instanceMap);
+    expect(resolve('test')).toBe(5);
   });
 });
