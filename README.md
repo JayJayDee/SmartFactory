@@ -13,6 +13,59 @@ npm i smart-factory
 ```
 
 ## simple usage
+### javascript + es6
+```javascript
+const { init, injectable, resolve } = require('smart-factory');
+
+// module names
+const ModuleNames = {
+  MSG_PROVIDER: 'MSG_PROVIDER',
+  MSG_PRINTER: 'MSG_PRINTER',
+  GREETER: 'GREETER'
+};
+
+// regiser message provider function to container
+injectable(ModuleNames.MSG_PROVIDER,
+  [], 
+  () =>
+    new Promise((resolve) => {
+      const toBeRegistered = (lang) => { // msgProvider function.
+        if (lang === 'en') return 'HELLO!';
+        else if (lang === 'ko') return '안녕하세요!';
+        else if (lang === 'es') return 'HOLA!';
+        return 'UNKNOWN';
+      };
+      resolve(toBeRegistered);
+    }));
+
+// register message printer function to container
+injectable(ModuleNames.MSG_PRINTER,
+  [], 
+  () => 
+    new Promise((resolve) => {
+      const toBeRegistered = (msg) => console.log(msg); // msgPrinter function
+      resolve(toBeRegistered);
+    }));
+
+// register greeter function to container.
+injectable(ModuleNames.GREETER,
+  [ModuleNames.MSG_PROVIDER, ModuleNames.MSG_PRINTER], // required dependancies
+  (provider, printer) => // dependancies which injected from container
+    new Promise((resolve) => {
+      const toBeRegistered = (lang) => { // greeter function.
+        printer(provider(lang));
+      };
+      resolve(toBeRegistered);
+    }));
+
+(() => {
+  init() // awaiting container ready
+    .then(() => {
+      const greet = resolve(ModuleNames.GREETER); // injects greeter function from container.
+      greet('en'); // HELLO!
+    });
+})();
+```
 ### typescript + es2015
 ```typescript
 import { init, injectable, resolve } from 'smart-factory';
@@ -60,4 +113,9 @@ injectable(
 ```
 
 ## API reference
+### async init(opts?: ContainerOptions)
+initialize container. after init() executed, you can retreive a modules from container.
+#### type ContainerOptions
 TBD
+### async injectable(key: string, deps: string[], instantiator: Instantiator)
+register modules to container.
