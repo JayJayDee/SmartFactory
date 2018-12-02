@@ -6,6 +6,7 @@ dependancy injection library for not only classes but also functions, strings, n
 - simple syntax, easy to use
 - lightweight
 - built-in typescript supports
+- supports lazy-instantiation
 
 ## installation
 ```
