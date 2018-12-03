@@ -13,3 +13,8 @@ export class DuplicateModuleKeyError extends Error {
     super(msg);
   }
 }
+export class DependancyNotfoundError extends Error {
+  constructor(msg: any) {
+    super(msg);
+  }
+}
