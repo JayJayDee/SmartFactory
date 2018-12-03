@@ -89,6 +89,7 @@ injectable(
       if (lang === 'en') return 'HELLO!';
       else if (lang === 'ko') return '안녕하세요!';
       else if (lang === 'es') return 'HOLA!';
+      return 'UNKNOWN';
     });
 
 injectable(
