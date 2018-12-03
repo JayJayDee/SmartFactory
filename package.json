@@ -1,7 +1,7 @@
 {
   "name": "smart-factory",
-  "version": "1.0.5",
-  "description": "",
+  "version": "1.0.7",
+  "description": "functional programming-ready dependancy injector/ioc container library",
   "main": "dist/lib/index.js",
   "typings": "dist/typings/lib/index.d.ts",
   "scripts": {
@@ -42,5 +42,11 @@
   "dependencies": {
     "glob": "^7.1.3",
     "lodash": "^4.17.11"
-  }
+  },
+  "keywords": [
+    "di",
+    "ioc",
+    "container",
+    "dependancy"
+  ]
 }

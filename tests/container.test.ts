@@ -1,6 +1,6 @@
 import { Candidate, ContainerLogger } from "../src/lib/types";
 import { injectableFunc, readyFunc, resolveFunc } from '../src/lib/container';
-import { CyclicReferenceError, DuplicateModuleKeyError, SelfReferenceError } from "../src/lib/errors";
+import { CyclicReferenceError, DuplicateModuleKeyError, SelfReferenceError, DependancyNotfoundError } from "../src/lib/errors";
 
 describe('injectableFunc tests', () => {
   test('after injectable() function executed, elements must be added to candidiates array', () => {
@@ -57,6 +57,15 @@ describe('readyFunc tests', () => {
     const instanceMap = new Map<string, any>();
     const ready = readyFunc(null, dummyLogger, candidates, instanceMap);
     expect(ready()).rejects.toBeInstanceOf(SelfReferenceError);
+  });
+
+  test('if there is a dependancy which not exists, must be throw error', () => {
+    const candidates: Candidate[] = [
+      { key: 'A', deps: ['B'], instantiator: async () => 1 }
+    ];
+    const instanceMap = new Map<string, any>();
+    const ready = readyFunc(null, dummyLogger, candidates, instanceMap);
+    expect(ready()).rejects.toBeInstanceOf(DependancyNotfoundError);
   });
 });
 
