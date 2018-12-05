@@ -1,5 +1,5 @@
 import { sortBy, reject } from 'lodash';
-import { CyclicReferenceError } from './errors';
+import { DependancyNotfoundError } from './errors';
 import { Candidate, Instantiator, Injectable, ContainerOptions, ContainerLogger } from './types';
 import { checkKeyDuplicates, checkCyclicReference, checkSelfReference } from './container-helpers';
 
@@ -40,7 +40,7 @@ export const readyFunc = (
         const cand = sorted.pop();
         loopCount++;
         if (loopCount > (numCandidates + 1) * numCandidates) {
-          throw new CyclicReferenceError(`cyclic reference found: ${cand.key}`);
+          throw new DependancyNotfoundError(`dependancy not found: ${cand.key}`);
         }
         const depInsts = cand.deps.map((name: string) => instances.get(name));
         if (reject(depInsts).length > 0) {
