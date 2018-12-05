@@ -7,8 +7,11 @@ import { checkKeyDuplicates, checkCyclicReference, checkSelfReference } from './
 export const injectableFunc = (
   srcOpts: ContainerOptions,
   candidates: Candidate[]) =>
-    async <T>(key: string, deps: string[], instantiator: Instantiator) => {
-      candidates.push({ key, deps, instantiator });
+    async <T>(key: string, deps: string[], instantiator: Instantiator, multiInstance?: boolean) => {
+      let multi = false;
+      if (multiInstance === true) multi = true;
+      
+      candidates.push({ key, deps, instantiator, multi });
       return new Injectable<T>(key);
     };
 
