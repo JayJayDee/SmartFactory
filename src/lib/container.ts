@@ -7,8 +7,11 @@ import { checkKeyDuplicates, checkCyclicReference, checkSelfReference } from './
 export const injectableFunc = (
   srcOpts: ContainerOptions,
   candidates: Candidate[]) =>
-    async <T>(key: string, deps: string[], instantiator: Instantiator) => {
-      candidates.push({ key, deps, instantiator });
+    async <T>(key: string, deps: string[], instantiator: Instantiator, multiInstance?: boolean) => {
+      let multi = false;
+      if (multiInstance === true) multi = true;
+      
+      candidates.push({ key, deps, instantiator, multi });
       return new Injectable<T>(key);
     };
 
@@ -39,12 +42,15 @@ export const readyFunc = (
         if (loopCount > (numCandidates + 1) * numCandidates) {
           throw new DependancyNotfoundError(`dependancy not found: ${cand.key}`);
         }
+        logger.debug(`* depdency:${cand.key} waiting to instantiate..`);
         const depInsts = cand.deps.map((name: string) => instances.get(name));
         if (reject(depInsts).length > 0) {
           sorted.unshift(cand);
+          logger.debug(`* one of branches of depdency:${cand.key} not ready. queing..`);
           continue;
         }
         const instance = await cand.instantiator.apply(this, depInsts);
+        logger.debug(`* dependency:${cand.key} instantiated!`);
         instances.set(cand.key, instance);
       }
       logger.debug(`* modules in container`);

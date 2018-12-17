@@ -14,6 +14,7 @@ export type Candidate = {
   key: string;
   deps: string[];
   instantiator: Instantiator;
+  multi?: boolean;
 };
 
 export type ContainerOptions = {
