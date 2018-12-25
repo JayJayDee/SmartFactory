@@ -1,7 +1,13 @@
-import { sortBy, reject } from 'lodash';
-import { DependancyNotfoundError } from './errors';
+import { sortBy } from 'lodash';
+import { EmptyDependencyError } from './errors';
 import { Candidate, Instantiator, Injectable, ContainerOptions, ContainerLogger } from './types';
 import { checkKeyDuplicates, checkCyclicReference, checkSelfReference } from './container-helpers';
+
+type GraphNode = {
+  key: string;
+  to: string[];
+  from: string[];
+};
 
 // container module-registerer factory.
 export const injectableFunc = (
@@ -22,8 +28,12 @@ export const readyFunc = (
   candidates: Candidate[],
   instances: Map<string, any>) =>
     async () => {
-      const sorted = sortBy(candidates, (cand) => cand.deps.length);
-      const numCandidates = sorted.length;
+      if (candidates.length === 0) {
+        throw new EmptyDependencyError('at least one dependency required.');
+      }
+
+      const sorted = sortBy(candidates, (cand) => cand.deps.length * -1);
+      // const numCandidates = sorted.length;
       logger.debug(`* injection candidates:`);
       logger.debug(sorted);
 
@@ -34,25 +44,12 @@ export const readyFunc = (
       } catch (err) {
         throw err;
       }
+      const nodes = graphNodes(sorted);
+      logger.debug('* dependency graph');
+      logger.debug(nodes);
 
-      let loopCount = 0;
-      while (instances.size < numCandidates) {
-        const cand = sorted.pop();
-        loopCount++;
-        if (loopCount > (numCandidates + 1) * numCandidates) {
-          throw new DependancyNotfoundError(`dependancy not found: ${cand.key}`);
-        }
-        logger.debug(`* depdency:${cand.key} waiting to instantiate..`);
-        const depInsts = cand.deps.map((name: string) => instances.get(name));
-        if (reject(depInsts).length > 0) {
-          sorted.unshift(cand);
-          logger.debug(`* one of branches of depdency:${cand.key} not ready. queing..`);
-          continue;
-        }
-        const instance = await cand.instantiator.apply(this, depInsts);
-        logger.debug(`* dependency:${cand.key} instantiated!`);
-        instances.set(cand.key, instance);
-      }
+      subgraphs(nodes);
+
       logger.debug(`* modules in container`);
       logger.debug(instances);
     };
@@ -64,3 +61,43 @@ export const resolveFunc = (
     <T> (key: string): T => {
       return instances.get(key);
     };
+
+// generate dependency graph nodes
+const graphNodes = (cands: Candidate[]): GraphNode[] => {
+  const nodeMap = new Map<string, GraphNode>();
+  cands.map((cand) => nodeMap.set(cand.key, {
+    key: cand.key,
+    to: cand.deps,
+    from: []
+  }));
+  cands.map((cand) => 
+    cand.deps.map((to) =>
+      nodeMap.get(to).from.push(cand.key)));
+  return Array.from(nodeMap.keys()).map((key) =>nodeMap.get(key));
+};
+
+// create subgraphs from graph nodes
+const subgraphs = (nodes: GraphNode[]) => {
+  const map = new Map<string, GraphNode>();
+  const visit = new Map<string, boolean>();
+  const stack: string[] = [];
+
+  nodes.map((n) => map.set(n.key, n));
+  nodes.map((n) => visit.set(n.key, false));
+  stack.push(nodes[0].key);
+
+  while(stack.length > 0) {
+    const n = stack.pop();
+    const node = map.get(n);
+    visit.set(n, true);
+    node.to.map((to) => 
+      visit.get(to) === false ?
+        stack.push(to) : null);
+    node.from.map((to) => 
+      visit.get(to) === false ?
+        stack.push(to) : null);
+    console.log('------');
+    console.log(node);
+  }
+  console.log(visit);
+};

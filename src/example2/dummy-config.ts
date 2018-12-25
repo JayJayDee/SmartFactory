@@ -28,6 +28,19 @@ injectable(Modules.Config,
     return { http, mysql };
   });
 
+injectable(Modules.A,
+  [Modules.B],
+  async (b: any) => {});
+
+injectable(Modules.B,
+  [Modules.C],
+  async (c: any) => {});
+
+injectable(Modules.C,
+  [Modules.A],
+  async (a: any) => {});
+  
+
 const delay = (sec: number) =>
   new Promise((resolve, reject) => {
     setTimeout(() => {
