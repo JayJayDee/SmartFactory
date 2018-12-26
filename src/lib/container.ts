@@ -1,6 +1,6 @@
 import { EmptyDependencyError } from './errors';
 import { Candidate, Instantiator, Injectable, ContainerOptions, ContainerLogger } from './types';
-import { checkKeyDuplicates, checkCyclicReference, checkSelfReference } from './container-helpers';
+import { checkKeyDuplicates, checkCyclicReference, checkSelfReference, checkDepNotfound } from './container-helpers';
 import instantiator from './instantiator';
 
 // container module-registerer factory.
@@ -29,6 +29,7 @@ export const readyFunc = (
       logger.debug(candidates);
 
       try {
+        checkDepNotfound(candidates);
         checkKeyDuplicates(candidates);
         checkCyclicReference(candidates);
         checkSelfReference(candidates);

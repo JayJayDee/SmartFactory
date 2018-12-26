@@ -1,6 +1,6 @@
-import {  includes, some, uniq, filter } from 'lodash';
+import { includes, some, uniq, filter } from 'lodash';
 import { Candidate } from './types';
-import { SelfReferenceError, DuplicateModuleKeyError, CyclicReferenceError } from './errors';
+import { SelfReferenceError, DuplicateModuleKeyError, CyclicReferenceError, DependancyNotfoundError } from './errors';
 
 export const checkCyclicReference = (arr: Candidate[]) => {
   arr.map((c) => {
@@ -20,6 +20,13 @@ export const checkNodeCycle = (arr: Candidate[], start: string) => {
       stack.push(d);
     });
   }
+};
+
+export const checkDepNotfound = (arr: Candidate[]) => {
+  const keys = arr.map((c) => c.key);
+  arr.map((c) => c.deps.map((d) => {
+    if (includes(keys, d) === false) throw new DependancyNotfoundError(`dependency not found: ${d}`);
+  }));
 };
 
 export const checkSelfReference = (arr: Candidate[]) => {
