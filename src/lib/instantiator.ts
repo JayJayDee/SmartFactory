@@ -28,6 +28,7 @@ const instantiator = (
         for (let i = 0; i < node.to.length; i++) {
           const key = node.to[i];
           const dep = instances.get(key);
+
           if (!dep) {
             pushNoDuplicate(queue, key);
             ready = false;
@@ -61,6 +62,7 @@ export const graphize = (candidates: Candidate[]): GraphNode[] => {
       from: [],
       instantiator: c.instantiator
     }));
+
   candidates.map((c) => c.deps.map((d) => {
     find(graph, {key: d}).from.push(c.key);
   }));
