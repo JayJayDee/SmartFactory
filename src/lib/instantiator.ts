@@ -1,4 +1,4 @@
-import { find } from 'lodash';
+import { find, includes } from 'lodash';
 import { ContainerLogger, Candidate } from './types';
 
 type GraphNode = {
@@ -8,26 +8,49 @@ type GraphNode = {
   instantiator: (...args: any[]) => Promise<any>;
 };
 
-type TryResult = {
-  deps: string[];
-  success: boolean;
-};
-
 // instantiator factory.
 const instantiator = (
   logger: ContainerLogger,
-  instances: Map<string, any>) => (candidates: Candidate[]) =>
-    new Promise((resolve, reject) => {
+  instances: Map<string, any>) =>
+    async (candidates: Candidate[]) => {
+      const baseTime = Date.now();
       logger.debug('* instantiating..');
 
       const graph = graphize(candidates);
       const map = new Map<string, GraphNode>();
-      const stack: string[] = [];
       graph.map((n) => map.set(n.key, n));
 
-      const trynode = tryNode(map, instances);
-    });
+      const queue: string[] = [ graph[0].key ];
+      while (queue.length > 0) {
+        const node = map.get(queue.pop());
+        let ready = true;
+
+        for (let i = 0; i < node.to.length; i++) {
+          const key = node.to[i];
+          const dep = instances.get(key);
+          if (!dep) {
+            pushNoDuplicate(queue, key);
+            ready = false;
+          }
+        }
+
+        if (ready === true) {
+          const deps = node.to.map((d) => instances.get(d));
+          const instance: any =
+            await node.instantiator.apply(this, deps);
+          const elapsed = Date.now() - baseTime;
+          instances.set(node.key, instance);
+          logger.debug(`* dependency resolved: ${node.key}, elapsed time: ${elapsed} ms`);
+        }
+        node.from.map((d) => {
+          if (!instances.get(d)) pushNoDuplicate(queue, d);
+        });
+      }
+    };
 export default instantiator;
+
+export const pushNoDuplicate = (queue: string[], elem: string) =>
+  includes(queue, elem) ? null : queue.push(elem)
 
 // generate graph
 export const graphize = (candidates: Candidate[]): GraphNode[] => {
@@ -43,11 +66,3 @@ export const graphize = (candidates: Candidate[]): GraphNode[] => {
   }));
   return graph;
 };
-
-export const tryNode = (
-  map: Map<string, GraphNode>,
-  instances: Map<string, any>) =>
-    (node: GraphNode): Promise<TryResult> =>
-      new Promise((resolve, reject) => {
-        
-      });
