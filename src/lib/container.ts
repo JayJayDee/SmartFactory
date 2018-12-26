@@ -1,7 +1,7 @@
-import { sortBy, reject } from 'lodash';
-import { DependancyNotfoundError } from './errors';
+import { EmptyDependencyError } from './errors';
 import { Candidate, Instantiator, Injectable, ContainerOptions, ContainerLogger } from './types';
 import { checkKeyDuplicates, checkCyclicReference, checkSelfReference } from './container-helpers';
+import instantiator from './instantiator';
 
 // container module-registerer factory.
 export const injectableFunc = (
@@ -22,37 +22,23 @@ export const readyFunc = (
   candidates: Candidate[],
   instances: Map<string, any>) =>
     async () => {
-      const sorted = sortBy(candidates, (cand) => cand.deps.length);
-      const numCandidates = sorted.length;
+      if (candidates.length === 0) {
+        throw new EmptyDependencyError('at least one dependency required.');
+      }
       logger.debug(`* injection candidates:`);
-      logger.debug(sorted);
+      logger.debug(candidates);
 
       try {
-        checkKeyDuplicates(sorted);
-        checkCyclicReference(sorted);
-        checkSelfReference(sorted);
+        checkKeyDuplicates(candidates);
+        checkCyclicReference(candidates);
+        checkSelfReference(candidates);
       } catch (err) {
         throw err;
       }
 
-      let loopCount = 0;
-      while (instances.size < numCandidates) {
-        const cand = sorted.pop();
-        loopCount++;
-        if (loopCount > (numCandidates + 1) * numCandidates) {
-          throw new DependancyNotfoundError(`dependancy not found: ${cand.key}`);
-        }
-        logger.debug(`* depdency:${cand.key} waiting to instantiate..`);
-        const depInsts = cand.deps.map((name: string) => instances.get(name));
-        if (reject(depInsts).length > 0) {
-          sorted.unshift(cand);
-          logger.debug(`* one of branches of depdency:${cand.key} not ready. queing..`);
-          continue;
-        }
-        const instance = await cand.instantiator.apply(this, depInsts);
-        logger.debug(`* dependency:${cand.key} instantiated!`);
-        instances.set(cand.key, instance);
-      }
+      const instantiate = instantiator(logger, instances);
+      await instantiate(candidates);
+
       logger.debug(`* modules in container`);
       logger.debug(instances);
     };

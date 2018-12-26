@@ -27,3 +27,18 @@ export type ContainerLogger = {
   info: (payload: any) => void;
   debug: (payload: any) => void;
 }
+
+export namespace Dependency {
+  export type Graph = {
+    vertexes: Vertex[];
+    edges: Edge[];
+  };
+
+  export type Vertex = {
+
+  };
+
+  export type Edge = {
+    
+  };
+}

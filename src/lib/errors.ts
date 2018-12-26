@@ -18,3 +18,8 @@ export class DependancyNotfoundError extends Error {
     super(msg);
   }
 }
+export class EmptyDependencyError extends Error {
+  constructor(msg: any) {
+    super(msg);
+  }
+}

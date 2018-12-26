@@ -1,13 +1,18 @@
 import { init, resolve } from "../lib";
-import { Modules } from './modules';
+import * as express from 'express';
 import { RunEndpointFunction } from './endpoints-runner';
+import { Modules } from './modules';
 import { Config } from './types';
 
 (async () => {
   // container configuration.
   await init({
-    includes: [`${__dirname}/**/*.ts`]
+    includes: [`${__dirname}/**/*.ts`],
+    debug: true
   });
+
+  const app = express();
+  app.listen(5000);
   
   // run application with resolved modules from container.
   const runServer = resolve<RunEndpointFunction>(Modules.EndpointsRunner);

@@ -6,5 +6,9 @@ export enum Modules {
   EndpointsRunner = 'EndpointsRunner',
   UserEndpoints = 'UserEndpoints',
   UserModel = 'UserModel',
-  MysqlDriver = 'MysqlDriver'
+  MysqlDriver = 'MysqlDriver',
+
+  A = 'A',
+  B = 'B',
+  C = 'C'
 }
