@@ -17,6 +17,8 @@ const instantiator = (
       logger.debug('* instantiating..');
 
       const graph = graphize(candidates);
+      logger.debug('* dependency graph created');
+
       const map = new Map<string, GraphNode>();
       graph.map((n) => map.set(n.key, n));
 

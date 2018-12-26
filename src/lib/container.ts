@@ -25,17 +25,26 @@ export const readyFunc = (
       if (candidates.length === 0) {
         throw new EmptyDependencyError('at least one dependency required.');
       }
-      logger.debug(`* injection candidates:`);
-      logger.debug(candidates);
+      logger.debug(`* ${candidates.length} injection candidates found:`);
+      logger.debug(candidates.map((c) => c.key));
 
       try {
         checkDepNotfound(candidates);
+        logger.debug('* [inspection] dependency missing not found');
+
         checkKeyDuplicates(candidates);
+        logger.debug('* [inspection] duplicated dependency key not found');
+
         checkCyclicReference(candidates);
+        logger.debug('* [inspection] cyclic dependency not found');
+
         checkSelfReference(candidates);
+        logger.debug('* [inspection] self-referencing dependency not found');
       } catch (err) {
         throw err;
       }
+
+      logger.debug('* dependency inspection completed');
 
       const instantiate = instantiator(logger, instances);
       await instantiate(candidates);

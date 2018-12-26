@@ -12,7 +12,6 @@ export const checkNodeCycle = (arr: Candidate[], start: string) => {
   const map = new Map<string, Candidate>();
   const stack = [ start ];
   arr.map((c) => map.set(c.key, c));
-
   while (stack.length > 0) {
     const node = map.get(stack.pop());
     node.deps.map((d) => {
