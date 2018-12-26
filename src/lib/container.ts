@@ -1,13 +1,7 @@
-import { sortBy } from 'lodash';
 import { EmptyDependencyError } from './errors';
 import { Candidate, Instantiator, Injectable, ContainerOptions, ContainerLogger } from './types';
 import { checkKeyDuplicates, checkCyclicReference, checkSelfReference } from './container-helpers';
-
-type GraphNode = {
-  key: string;
-  to: string[];
-  from: string[];
-};
+import instantiator from './instantiator';
 
 // container module-registerer factory.
 export const injectableFunc = (
@@ -31,24 +25,19 @@ export const readyFunc = (
       if (candidates.length === 0) {
         throw new EmptyDependencyError('at least one dependency required.');
       }
-
-      const sorted = sortBy(candidates, (cand) => cand.deps.length * -1);
-      // const numCandidates = sorted.length;
       logger.debug(`* injection candidates:`);
-      logger.debug(sorted);
+      logger.debug(candidates);
 
       try {
-        checkKeyDuplicates(sorted);
-        checkCyclicReference(sorted);
-        checkSelfReference(sorted);
+        checkKeyDuplicates(candidates);
+        checkCyclicReference(candidates);
+        checkSelfReference(candidates);
       } catch (err) {
         throw err;
       }
-      const nodes = graphNodes(sorted);
-      logger.debug('* dependency graph');
-      logger.debug(nodes);
 
-      subgraphs(nodes);
+      const instantiate = instantiator(logger, instances);
+      await instantiate(candidates);
 
       logger.debug(`* modules in container`);
       logger.debug(instances);
@@ -61,43 +50,3 @@ export const resolveFunc = (
     <T> (key: string): T => {
       return instances.get(key);
     };
-
-// generate dependency graph nodes
-const graphNodes = (cands: Candidate[]): GraphNode[] => {
-  const nodeMap = new Map<string, GraphNode>();
-  cands.map((cand) => nodeMap.set(cand.key, {
-    key: cand.key,
-    to: cand.deps,
-    from: []
-  }));
-  cands.map((cand) => 
-    cand.deps.map((to) =>
-      nodeMap.get(to).from.push(cand.key)));
-  return Array.from(nodeMap.keys()).map((key) =>nodeMap.get(key));
-};
-
-// create subgraphs from graph nodes
-const subgraphs = (nodes: GraphNode[]) => {
-  const map = new Map<string, GraphNode>();
-  const visit = new Map<string, boolean>();
-  const stack: string[] = [];
-
-  nodes.map((n) => map.set(n.key, n));
-  nodes.map((n) => visit.set(n.key, false));
-  stack.push(nodes[0].key);
-
-  while(stack.length > 0) {
-    const n = stack.pop();
-    const node = map.get(n);
-    visit.set(n, true);
-    node.to.map((to) => 
-      visit.get(to) === false ?
-        stack.push(to) : null);
-    node.from.map((to) => 
-      visit.get(to) === false ?
-        stack.push(to) : null);
-    console.log('------');
-    console.log(node);
-  }
-  console.log(visit);
-};

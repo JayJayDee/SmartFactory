@@ -1,18 +1,26 @@
 import {  includes, some, uniq, filter } from 'lodash';
 import { Candidate } from './types';
-import { CyclicReferenceError, SelfReferenceError, DuplicateModuleKeyError } from './errors';
+import { SelfReferenceError, DuplicateModuleKeyError, CyclicReferenceError } from './errors';
 
 export const checkCyclicReference = (arr: Candidate[]) => {
-  let expr = null;
-  const cyclics = subsets(arr, 2).map((subset) => {
-    const cross = crossReference(subset[0], subset[1]);
-    if (cross === true) {
-      expr = `${subset[0].key}, ${subset[1].key}`;
-    }
-    return cross;
+  arr.map((c) => {
+    checkNodeCycle(arr, c.key);
   });
-  if (some(cyclics)) throw new CyclicReferenceError(`cyclic reference found: ${expr}`);
-}
+};
+
+export const checkNodeCycle = (arr: Candidate[], start: string) => {
+  const map = new Map<string, Candidate>();
+  const stack = [ start ];
+  arr.map((c) => map.set(c.key, c));
+
+  while (stack.length > 0) {
+    const node = map.get(stack.pop());
+    node.deps.map((d) => {
+      if (d === start) throw new CyclicReferenceError(`cyclic reference found: ${d}`);
+      stack.push(d);
+    });
+  }
+};
 
 export const checkSelfReference = (arr: Candidate[]) => {
   let moduleName = null;
