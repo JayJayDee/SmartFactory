@@ -3,23 +3,30 @@ import { Candidate } from './types';
 import { SelfReferenceError, DuplicateModuleKeyError, CyclicReferenceError, DependancyNotfoundError } from './errors';
 
 export const checkCyclicReference = (arr: Candidate[]) => {
+  const map = new Map<string, Candidate>();
+  const visit = new Map<string, boolean>();
+  arr.map((c) => map.set(c.key, c));
+  arr.map((c) => visit.set(c.key, false));
   arr.map((c) => {
-    checkNodeCycle(arr, c.key);
+    checkNodeCycle(map, visit, c.key);
   });
 };
 
-export const checkNodeCycle = (arr: Candidate[], start: string) => {
-  const map = new Map<string, Candidate>();
-  const stack = [ start ];
-  arr.map((c) => map.set(c.key, c));
-  while (stack.length > 0) {
-    const node = map.get(stack.pop());
-    node.deps.map((d) => {
-      if (d === start) throw new CyclicReferenceError(`cyclic reference found: ${d}`);
-      stack.push(d);
-    });
-  }
-};
+export const checkNodeCycle = 
+  (map: Map<string, Candidate>, visit: Map<string, boolean>, start: string) => {
+    Array.from(visit.keys()).map((k) => visit.set(k, false));
+    const stack = [ start ];
+    while (stack.length > 0) {
+      const node = map.get(stack.pop());
+      if (visit.get(node.key) === false) {
+        visit.set(node.key, true);
+        node.deps.map((d) => {
+          if (d === start) throw new CyclicReferenceError(`cyclic reference found: ${d}`);
+          stack.push(d);
+        });
+      }
+    }
+  };
 
 export const checkDepNotfound = (arr: Candidate[]) => {
   const keys = arr.map((c) => c.key);

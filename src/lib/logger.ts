@@ -2,7 +2,7 @@ import { ContainerOptions, ContainerLogger } from "./types";
 
 const logger = (opts: ContainerOptions): ContainerLogger => ({
   info(payload) {
-    console.log(`payload`);
+    console.log(payload);
   },
 
   debug(payload) {
