@@ -115,9 +115,46 @@ injectable(
 ```
 
 ## API reference
-### async init(opts?: ContainerOptions)
+## async init(opts?: ContainerOptions): Promise\<void>
 initialize container. after init() executed, you can retreive a modules from container.
-#### type ContainerOptions
+### type ContainerOptions
+| key | mandantory | default | description |
+| --- | --- | -- | -- |
+| debug?: boolean | no | false | show container logs. for debug purpose. |
+| includes?: string[] | no | null | specify path for modules which calls injectable(). |
+| excludes?: string[] | no | null | specify path for exceptional modules. |
+### example
+```typescript
+(async () => {
+  await init({
+    debug: true,
+    includes: [`${__dirname}/**/*.ts`]
+  });
+})();
+```
+##  injectable(key: string, deps: string[], instantiator: Instantiator): void
+register modules to container. 
+### example
+```typescript
+injectable(
+  'COFFEE_MAKER', // module name
+  [ 'COFFEE_BEAN', 'WATER', 'SUGAR' ], // required dependencies
+  async (bean, water, sugar) => // the "Instantiator": returns coffeeMaker function. 
+    () => { // coffeeMaker function
+      return {
+        bean, water, sugar
+      }
+    }
+);
+```
+## async resolve\<T>(key: string): Promise\<any>
+resolves module from container. with typescript, you can specify type.
+### example
+```typescript
+(async () => {
+  const coffeeMaker = await <CoffeeMaker>resolve('COFFEE_MAKER');
+})
+```
+
+# How it works
 TBD
-### async injectable(key: string, deps: string[], instantiator: Instantiator)
-register modules to container.
