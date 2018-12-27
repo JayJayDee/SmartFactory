@@ -7,7 +7,7 @@ injectable('D', ['E'], async () => 'A');
 injectable('E', ['F'], async () => () => 'A');
 injectable('F', ['G'], async () => () => 'A');
 injectable('G', ['H'], async () => () => 'A');
-injectable('H', ['I', 'Config'], async () => () => 'A');
+injectable('H', ['I', 'Config', 'HttpConfig'], async () => () => 'A');
 injectable('I', ['J', 'L', 'K', 'Config'], async () => () => 'A');
 injectable('J', ['K'], async () => () => 'A');
 injectable('K', ['L', 'Config'], async () => () => 'A');
