@@ -140,10 +140,17 @@ initialize container. after init() executed, you can retreive a modules from con
 register modules to container. 
 ### example
 ```typescript
+type Coffee = {
+  bean: CoffeeBean;
+  water: Water;
+  sugar: Sugar;
+};
+type CoffeeMaker = () => Coffee;
+
 injectable(
   'COFFEE_MAKER', // module name
   [ 'COFFEE_BEAN', 'WATER', 'SUGAR' ], // required dependencies
-  async (bean, water, sugar) => // the "Instantiator": returns coffeeMaker function. 
+  async (bean, water, sugar): Promise<CoffeeMaker> => // the "Instantiator": returns coffeeMaker function. 
     () => { // coffeeMaker function
       return {
         bean, water, sugar
@@ -151,14 +158,13 @@ injectable(
     }
 );
 ```
-## async resolve\<T>(key: string): Promise\<any>
+## async resolve\<T>(key: string): Promise\<T>
 resolves module from container. with typescript, you can specify type.
 ### example
 ```typescript
 (async () => {
-  const coffeeMaker = await <CoffeeMaker>resolve('COFFEE_MAKER');
+  const makeCoffee = await <CoffeeMaker>resolve('COFFEE_MAKER');
+  const coffee = makeCoffee();
+  console.log(coffee); // { bean, water, sugar }!
 })
 ```
-
-# How it works
-TBD
