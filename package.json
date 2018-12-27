@@ -1,13 +1,14 @@
 {
   "name": "smart-factory",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "functional programming-ready dependancy injector/ioc container library",
   "main": "dist/lib/index.js",
   "typings": "dist/typings/lib/index.d.ts",
   "scripts": {
     "dev": "TS_NODE_FILES=true nodemon --exec ts-node -- --project ./tsconfig.json ./src/example2",
-    "example1": "TS_NODE_FILES=true ts-node --project ./tsconfig.json ./src/example1",
+    "example1": "TS_NODE_FILES=true nodemon --watch ./src -e ts --exec ts-node -- --project ./tsconfig.json ./src/example1",
     "example2": "TS_NODE_FILES=true nodemon --watch ./src -e ts --exec ts-node -- --project ./tsconfig.json ./src/example2",
+    "example3": "TS_NODE_FILES=true nodemon --watch ./src -e ts --exec ts-node -- --project ./tsconfig.json ./src/example3",
     "build": "npm run test && tsc -p tsconfig.release.json",
     "test": "jest -c jest.config.js",
     "lint": "tslint -t stylish --project ./tsconfig.json",

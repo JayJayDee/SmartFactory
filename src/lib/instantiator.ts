@@ -1,4 +1,4 @@
-import { find, includes } from 'lodash';
+import { every, find, includes } from 'lodash';
 import { ContainerLogger, Candidate } from './types';
 
 type GraphNode = {
@@ -17,41 +17,46 @@ const instantiator = (
       logger.debug('* instantiating..');
 
       const graph = graphize(candidates);
+      logger.debug('* dependency graph created');
+
       const map = new Map<string, GraphNode>();
+      const fail = new Map<string, boolean>();
+
       graph.map((n) => map.set(n.key, n));
+      graph.map((n) => fail.set(n.key, false));
 
       const queue: string[] = [ graph[0].key ];
       while (queue.length > 0) {
         const node = map.get(queue.pop());
-        let ready = true;
+        const deps = node.to.map((d) => instances.get(d));
 
-        for (let i = 0; i < node.to.length; i++) {
-          const key = node.to[i];
-          const dep = instances.get(key);
-
-          if (!dep) {
-            pushNoDuplicate(queue, key);
-            ready = false;
-          }
-        }
-
-        if (ready === true) {
+        node.to.map((d) => 
+          !instances.get(d) ? 
+            pushNoDuplicate(queue, fail, d) : null);
+        
+        if (every(deps) === true) {
           const deps = node.to.map((d) => instances.get(d));
           const instance: any =
             await node.instantiator.apply(this, deps);
           const elapsed = Date.now() - baseTime;
+
+          fail.set(node.key, false);
           instances.set(node.key, instance);
           logger.debug(`* dependency resolved: ${node.key}, elapsed time: ${elapsed} ms`);
+
+          node.from.map((d) => {
+            if (!instances.get(d)) {
+              pushNoDuplicate(queue, fail, d);
+            }
+          });
         }
-        node.from.map((d) => {
-          if (!instances.get(d)) pushNoDuplicate(queue, d);
-        });
       }
     };
 export default instantiator;
 
-export const pushNoDuplicate = (queue: string[], elem: string) =>
-  includes(queue, elem) ? null : queue.push(elem)
+export const pushNoDuplicate = (queue: string[], fail: Map<string, boolean>, elem: string) =>
+  includes(queue, elem) ? null :
+    fail.get(elem) ? null : queue.push(elem);
 
 // generate graph
 export const graphize = (candidates: Candidate[]): GraphNode[] => {
