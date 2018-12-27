@@ -1,20 +1,24 @@
 # smart-factory
+[![npm version](https://badge.fury.io/js/smart-factory.svg)](https://badge.fury.io/js/smart-factory)
+
+
+
 Simple dependancy injector for node.js.  
 dependancy injection library for not only classes but also functions, strings, numbers, ... and all objects in the world.
 
-## features
+# features
 - simple syntax, easy to use
 - lightweight
 - built-in typescript supports
 - supports lazy-instantiation
 
-## installation
+# installation
 ```
 npm i smart-factory
 ```
 
-## simple usage
-### javascript + es6
+# simple usage
+## javascript + es6
 ```javascript
 const { init, injectable, resolve } = require('smart-factory');
 
@@ -67,7 +71,7 @@ injectable(ModuleNames.GREETER,
     });
 })();
 ```
-### typescript + es2015
+## typescript + es2015
 ```typescript
 import { init, injectable, resolve } from 'smart-factory';
 
@@ -114,7 +118,7 @@ injectable(
 })();
 ```
 
-## API reference
+# API reference
 ## async init(opts?: ContainerOptions): Promise\<void>
 initialize container. after init() executed, you can retreive a modules from container.
 ### type ContainerOptions
