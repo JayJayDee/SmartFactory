@@ -2,7 +2,7 @@ import { init, resolve } from "../lib";
 import * as express from 'express';
 import { RunEndpointFunction } from './endpoints-runner';
 import { Modules } from './modules';
-import { Config } from './types';
+import {  HttpConfig } from './types';
 
 (async () => {
   // container configuration.
@@ -16,7 +16,7 @@ import { Config } from './types';
   
   // run application with resolved modules from container.
   const runServer = resolve<RunEndpointFunction>(Modules.EndpointsRunner);
-  const cfg = resolve<Config>(Modules.Config);
+  const cfg = resolve<HttpConfig>(Modules.HttpConfig);
   await runServer();
-  console.log(`app running on port ${cfg.http.port}`);
+  console.log(`app running on port ${cfg.port}`);
 })();

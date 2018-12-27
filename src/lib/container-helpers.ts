@@ -21,7 +21,7 @@ export const checkNodeCycle =
       if (visit.get(node.key) === false) {
         visit.set(node.key, true);
         node.deps.map((d) => {
-          if (d === start) throw new CyclicReferenceError(`cyclic reference found: ${d}`);
+          if (d === start) throw new CyclicReferenceError(`cyclic reference found: ${node.key} <-> ${d}`);
           stack.push(d);
         });
       }
