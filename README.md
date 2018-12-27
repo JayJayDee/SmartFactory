@@ -1,4 +1,8 @@
 # smart-factory
+[![npm version](https://badge.fury.io/js/smart-factory.svg)](https://badge.fury.io/js/smart-factory)
+
+
+
 Simple dependancy injector for node.js.  
 dependancy injection library for not only classes but also functions, strings, numbers, ... and all objects in the world.
 
