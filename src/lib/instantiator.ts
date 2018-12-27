@@ -25,7 +25,8 @@ const instantiator = (
       const queue: string[] = [ graph[0].key ];
       while (queue.length > 0) {
         const node = map.get(queue.pop());
-        let ready = true;
+        console.log(node.key);
+        let ready = true; //wrong
 
         for (let i = 0; i < node.to.length; i++) {
           const key = node.to[i];
