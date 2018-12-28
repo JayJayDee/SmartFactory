@@ -60,3 +60,10 @@ export const resolveFunc = (
     <T> (key: string): T => {
       return instances.get(key);
     };
+
+// replace module in container.
+export const setFunc = (
+  srcOpts: ContainerOptions,
+  instances: Map<string, any>) =>
+    <T> (key: string, instance: T) =>
+      instances.set(key, instance);

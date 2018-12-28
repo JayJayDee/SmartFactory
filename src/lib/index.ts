@@ -1,6 +1,6 @@
 import * as glob from 'glob';
 
-import { resolveFunc, injectableFunc, readyFunc } from './container';
+import { resolveFunc, injectableFunc, readyFunc, setFunc } from './container';
 import searchFunc, { GlobPromise } from './module-resolver';
 import loggerFunc from './logger';
 import { Candidate, ContainerOptions } from './types';
@@ -42,9 +42,12 @@ const initializer = (srcOptions: ContainerOptions) =>
     await ready();
   };
 
+const setter = (srcOptions: ContainerOptions) =>
+  setFunc(srcOptions, instanceMap);
+
 const resolve = resolveFunc(options, instanceMap);
 const injectable = injectableFunc(options, candidates);
 const init = initializer(options);
-export {
-  resolve, injectable, init
-}
+const set = setter(options);
+
+export { resolve, injectable, init, set }
