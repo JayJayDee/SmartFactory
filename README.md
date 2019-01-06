@@ -3,11 +3,14 @@
 
 
 
-Simple dependancy injector for node.js.  
-dependancy injection library for not only classes but also functions, strings, numbers, ... and all objects in the world.
+Simple but powerful, functional-programming ready Dependency Injector/Container library for node.js.
+
+dependency injection library for not only classes but also functions, strings, numbers, ... and all objects in the world.
+
 
 # features
 - simple syntax, easy to use
+- functional-programming ready
 - lightweight
 - built-in typescript supports
 - supports lazy-instantiation
@@ -54,8 +57,8 @@ injectable(ModuleNames.MSG_PRINTER,
 
 // register greeter function to container.
 injectable(ModuleNames.GREETER,
-  [ModuleNames.MSG_PROVIDER, ModuleNames.MSG_PRINTER], // required dependancies
-  (provider, printer) => // dependancies which injected from container
+  [ModuleNames.MSG_PROVIDER, ModuleNames.MSG_PRINTER], // required dependencies
+  (provider, printer) => // dependencies which injected from container
     new Promise((resolve) => {
       const toBeRegistered = (lang) => { // greeter function.
         printer(provider(lang));
@@ -87,7 +90,7 @@ export type HelloFunction = (lang: string) => void;
 
 injectable(
   Modules.MSG_PROVIDER, // module name
-  [], // dependancies
+  [], // dependencies
   async (): Promise<MsgProvider> =>
     (lang: string): string => {
       if (lang === 'en') return 'HELLO!';
@@ -104,7 +107,7 @@ injectable(
 
 injectable(
    Modules.HELLO_FUNC,
-   [ Modules.MSG_PROVIDER, Modules.MSG_PRINTER ], // has dependancies to MsgProvider, MsgPrinter
+   [ Modules.MSG_PROVIDER, Modules.MSG_PRINTER ], // has dependencies to MsgProvider, MsgPrinter
    async (provider: MsgProvider, printer: MsgPrinter): HelloFunction =>
      (lang: string) => {
        printer(provider(lang));
@@ -137,7 +140,13 @@ initialize container. after init() executed, you can retreive a modules from con
 })();
 ```
 ##  injectable(key: string, deps: string[], instantiator: Instantiator): void
-register modules to container. 
+register modules to container. the dependencies ```deps[]``` will be injeted before the module instantiated.
+
+
+after all dependencies meets requirements, the modules will be instantiated and registered to container with name ```key```.
+
+
+the ```instantiator``` is your async function that preparing instance from given dependencies ```deps[]```.
 ### example
 ```typescript
 type Coffee = {
@@ -158,7 +167,7 @@ injectable(
     }
 );
 ```
-## async resolve\<T>(key: string): Promise\<T>
+## resolve\<T>(key: string): \<T>
 resolves module from container. with typescript, you can specify type.
 ### example
 ```typescript
@@ -166,5 +175,42 @@ resolves module from container. with typescript, you can specify type.
   const makeCoffee = await <CoffeeMaker>resolve('COFFEE_MAKER');
   const coffee = makeCoffee();
   console.log(coffee); // { bean, water, sugar }!
-})
+})();
 ```
+## set\<T>(key: string, instance: T): void
+replace an instance in container with given key and instance. you can use this feature in the test codes.
+```typescript
+(async () => {
+  injectable('A', [], async () => 10);
+  await init(); // container initialized.
+
+  const value = <number>resolve('A');
+  console.log(value); // "10"
+
+  set('A', 20);
+  const valueAfterSet = <number>resolve('A');
+  console.log(valueAfterSet); // "20"
+})();
+```
+## clear(): void
+clear all instances in container
+```typescript
+(async () => {
+  injectable('A', [], async () => 10);
+  await init(); // container initialized.
+
+  const value = <number>resolve('A');
+  console.log(value); // "10"
+
+  clear(); // nothing in container.
+})();
+```
+
+# More complicated examples
+There are a more complicated examples that using smart-factory. you can learn how to manage complicated dependencies (ex: configuration, database, models..) for complicated application with the smart-factory.
+
+
+- [Chatpot-Room-Server](https://github.com/JayJayDee/Chatpot-Room-Server)
+  - chatting-room server written with Typescript, smart-factory
+  - configurations, mysql, models, api endpoints
+  - shows handling modules names and types with typescript way.

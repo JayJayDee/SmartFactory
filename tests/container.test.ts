@@ -1,5 +1,5 @@
 import { Candidate, ContainerLogger } from "../src/lib/types";
-import { injectableFunc, readyFunc, resolveFunc } from '../src/lib/container';
+import { injectableFunc, readyFunc, resolveFunc, clearFunc } from '../src/lib/container';
 import { CyclicReferenceError, DuplicateModuleKeyError, DependancyNotfoundError } from "../src/lib/errors";
 
 describe('injectableFunc tests', () => {
@@ -75,5 +75,16 @@ describe('resolveFunc() tests', () => {
     instanceMap.set('test', 5);
     const resolve = resolveFunc({}, instanceMap);
     expect(resolve('test')).toBe(5);
+  });
+});
+
+describe('clear() tests', () => {
+  test('instances must be cleared after clear() executed', () => {
+    const instanceMap = new Map<string, any>();
+    instanceMap.set('test', 5);
+    instanceMap.set('test2', 10);
+    const clear = clearFunc({}, instanceMap);
+    clear();
+    expect(Array.from(instanceMap.keys()).length).toBe(0);
   });
 });

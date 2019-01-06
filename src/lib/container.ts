@@ -67,3 +67,9 @@ export const setFunc = (
   instances: Map<string, any>) =>
     <T> (key: string, instance: T) =>
       instances.set(key, instance);
+
+// clear all modules in container.
+export const clearFunc = (
+  srcOpts: ContainerOptions,
+  instances: Map<string, any>) =>
+    () => instances.clear();
